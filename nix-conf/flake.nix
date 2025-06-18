@@ -33,6 +33,7 @@
         modules = [
           nixos-wsl.nixosModules.default
           ./configuration.nix
+#          ./modules/docker.nix
            # Home manager as NixOS module
           home-manager.nixosModules.home-manager
           {
@@ -40,9 +41,38 @@
             home-manager.useUserPackages = true;
             home-manager.users.tj = ./home.nix;
             }
-       ];
+#          {
+#            services.myDocker = {
+#              enable = true;
+#              rootless = true;
+#              enableCompose = true;
+#              users = [ "tj" ];
+
+#              registryMirrors = [ "https://mirror.gcr.io" ];
+#              addressPools = [
+#                { base = "172.30.0.0/16"; size = 24; }
+#              ];
+
+#              containers = {
+#                redis = {
+#                  image = "redis:7-alpine";
+#                  ports = [ "6379:6379" ];
+#                  volumes = [ "/var/lib/redis:/data" ];
+#                  environment = {
+#                    REDIS_APPENDONLY = "yes";
+#                  };
+#                };
+#                nginx = {
+#                  image = "nginx:alpine";
+#                  ports = [ "8080:80" ];
+#                  volumes = [ "/var/www:/usr/share/nginx/html:ro" ];
+#                };
+#              };
+#            };
+#          }
+          ];
+        };
       };
-    };
   #    homeConfigurations = {
       # FIXME replace with your username@hostname
    #   "tj@nixos" = home-manager.lib.homeManagerConfiguration {

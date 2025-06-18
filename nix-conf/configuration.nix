@@ -15,9 +15,14 @@
 
   wsl = {
     enable = true;
-    wslConf.automount.root = "/mnt";
+    wslConf = {
+      interop.appendWindowPath = false;
+      network.generateHosts = false;
+      automount.root = "/mnt";
+    };
     defaultUser = "tj";
     startMenuLaunchers = true;
+    docker-desktop.enable = true;
   };
 
   home-manager.users.tj = { pkgs, ... }: {
@@ -53,6 +58,20 @@
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
     #  ""
       ];
+    };
+  };
+
+  virtualisation.docker = {
+    enable = true;
+    storageDriver = "btrfs";
+    enableOnBoot = true;
+    autoPrune = true;
+    rootless = {
+      enable = true;
+      setSocketVariable = true;
+    };
+    daemon.settings = {
+      data-root = "";
     };
   };
 

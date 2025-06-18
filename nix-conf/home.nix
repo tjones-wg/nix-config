@@ -25,7 +25,7 @@ let
 
     $env.PATH = ($env.PATH |
       split row (char esep) |
-      prepend /home/myuser/.apps |
+      prepend $env.HOME/.apps |
       append /usr/bin/env
     )
   '';
@@ -43,6 +43,9 @@ in
     atuin
     
     # Development tools
+    docker
+    compose2nix
+    nix-prefetch-docker
     git-crypt
     sops
     just
@@ -108,9 +111,8 @@ in
       enable = true;
       userName = "tjones-wg";
       userEmail = "tj@wgcpas.com"; # Replace with your actual email
-      safe.directory = "/etc/nixos";
       extraConfig = {
-        init.defaultBranch = "main";
+        init.defaultBranch = "dev";
         pull.rebase = false;
         # Add git-crypt configuration if needed
       };

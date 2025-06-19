@@ -1,12 +1,13 @@
 # docker.nix - Docker module for NixOS configuration
-{ config, lib, pkgs, ... }:
-
-with lib;
-
-let
-  cfg = config.services.myDocker;
-in
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+with lib; let
+  cfg = config.services.myDocker;
+in {
   options.services.myDocker = {
     enable = mkEnableOption "Enable Docker with custom configuration";
 
@@ -33,7 +34,7 @@ in
     registryMirrors = mkOption {
       type = types.listOf types.str;
       default = [];
-      example = [ "https://mirror.gcr.io" ];
+      example = ["https://mirror.gcr.io"];
       description = "List of registry mirrors for faster pulls";
     };
 
@@ -52,7 +53,12 @@ in
           };
         };
       });
-      default = [ { base = "172.30.0.0/16"; size = 24; } ];
+      default = [
+        {
+          base = "172.30.0.0/16";
+          size = 24;
+        }
+      ];
       description = "Custom address pools to avoid network conflicts";
     };
 
@@ -71,7 +77,10 @@ in
     containers = mkOption {
       type = types.attrsOf (types.submodule {
         options = {
-          image = mkOption { type = types.str; description = "Container image"; };
+          image = mkOption {
+            type = types.str;
+            description = "Container image";
+          };
           ports = mkOption {
             type = types.listOf types.str;
             default = [];
@@ -102,43 +111,53 @@ in
   config = mkIf cfg.enable {
     virtualisation.docker = {
       enable = !cfg.rootless;
-      storageDriver = cfg.storageDriver;
-      daemon.settings = {
-        experimental = true;
-        registry-mirrors = cfg.registryMirrors;
-        default-address-pools = cfg.addressPools;
-        log-driver = "journald";
-        dns = [ "1.1.1.1" "8.8.8.8" ];
-      } // optionalAttrs (cfg.dataRoot != null) {
-        data-root = cfg.dataRoot;
-      };
+      inherit (cfg) storageDriver;
+      daemon.settings =
+        {
+          experimental = true;
+          registry-mirrors = cfg.registryMirrors;
+          default-address-pools = cfg.addressPools;
+          log-driver = "journald";
+          dns = ["1.1.1.1" "8.8.8.8"];
+        }
+        // optionalAttrs (cfg.dataRoot != null) {
+          data-root = cfg.dataRoot;
+        };
 
       rootless = mkIf cfg.rootless {
         enable = true;
         setSocketVariable = true;
         daemon.settings = {
           registry-mirrors = cfg.registryMirrors;
-          dns = [ "1.1.1.1" "8.8.8.8" ];
+          dns = ["1.1.1.1" "8.8.8.8"];
         };
       };
     };
 
-    environment.systemPackages = with pkgs; [
-      docker
-    ] ++ optional cfg.rootless podman
+    environment.systemPackages = with pkgs;
+      [
+        docker
+      ]
+      ++ optional cfg.rootless podman
       ++ optional cfg.enableCompose docker-compose;
 
     users.users = mkMerge (map (user: {
-      ${user} = {
-        extraGroups = [ "docker" ];
-      };
-    }) cfg.users);
+        ${user} = {
+          extraGroups = ["docker"];
+        };
+      })
+      cfg.users);
 
     virtualisation.oci-containers = mkIf (cfg.containers != {}) {
-      backend = if cfg.rootless then "podman" else "docker";
-      containers = mapAttrs (_: c: {
-        inherit (c) image ports volumes environment autoStart;
-      }) cfg.containers;
+      backend =
+        if cfg.rootless
+        then "podman"
+        else "docker";
+      containers =
+        mapAttrs (_: c: {
+          inherit (c) image ports volumes environment autoStart;
+        })
+        cfg.containers;
     };
 
     systemd.tmpfiles.rules = mkIf cfg.rootless (

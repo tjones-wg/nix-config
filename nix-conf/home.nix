@@ -1,7 +1,10 @@
 # home.nix - Home Manager configuration
-{ config, pkgs, inputs, ... }:
-
-let
+{
+  config,
+  pkgs,
+  inputs,
+  ...
+}: let
   # Pure config file generation (no destination!)
   nuConfigFile = pkgs.writeText "nu-config.nu" ''
     let carapace_completer = {|spans|
@@ -29,46 +32,45 @@ let
       append /usr/bin/env
     )
   '';
-in
-
-{
+in {
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
-  home.username = "tj";
-  home.homeDirectory = "/home/tj";
+  home = {
+    username = "tj";
+    homeDirectory = "/home/tj";
 
-  # User-specific packages
-  home.packages = with pkgs; [
-    # sync shell history
-    atuin
-    
-    # Development tools
-    docker
-    compose2nix
-    git-crypt
-    sops
-    just
-    lunarvim
-    direnv
-    vscode
-    starship
+    # User-specific packages
+    packages = with pkgs; [
+      # sync shell history
+      atuin
 
-    # Programming languages
-    python314
-    go
-    carapace
-    
-    # Additional tools you might want
-    age # works well with sops
-    ssh-to-age # for sops key conversion
-  ];
+      # Development tools
+      docker
+      compose2nix
+      git-crypt
+      sops
+      just
+      lunarvim
+      direnv
+      vscode
+      starship
 
+      # Programming languages
+      python314
+      go
+      carapace
+
+      # Additional tools you might want
+      age # works well with sops
+      ssh-to-age # for sops key conversion
+    ];
+  };
   # Program configurations
   programs = {
     atuin = {
       enable = true;
       settings = {
-       # sync_address = IODEV01";
+        # sync_address = IODEV01";
         sync_frequency = "15m";
         dialect = "us";
       };
@@ -76,35 +78,34 @@ in
 
     # Shell
     # Pure config file generation (no destination!)
-  nushell = {
-    enable = true;
-    configFile = {
-      source = nuConfigFile;
-    };
-    shellAliases = {
-      vi = "lunarvim";
-      vim = "lunarvim";
-      nano = "nano";
-    };
-  };
-
-  carapace = {
-    enable = true;
-    enableNushellIntegration = true;
-  };
-
-  starship = {
-    enable = true;
-    settings = {
-      add_newline = true;
-      character = {
-        success_symbol = "[➜](bold green)";
-        error_symbol = "[➜](bold red)";
+    nushell = {
+      enable = true;
+      configFile = {
+        source = nuConfigFile;
+      };
+      shellAliases = {
+        vi = "lunarvim";
+        vim = "lunarvim";
+        nano = "nano";
       };
     };
-  };
 
- 
+    carapace = {
+      enable = true;
+      enableNushellIntegration = true;
+    };
+
+    starship = {
+      enable = true;
+      settings = {
+        add_newline = true;
+        character = {
+          success_symbol = "[➜](bold green)";
+          error_symbol = "[➜](bold red)";
+        };
+      };
+    };
+
     # Version control
     git = {
       enable = true;
@@ -115,7 +116,7 @@ in
         pull.rebase = false;
         # Add git-crypt configuration if needed
       };
-      
+
       # Git aliases
       aliases = {
         st = "status";
@@ -124,29 +125,28 @@ in
         ci = "commit";
       };
     };
-    
+
     # Terminal multiplexer
     tmux = {
       enable = true;
       terminal = "screen-256color";
       historyLimit = 100000;
       shortcut = "t";
-      clock24 = true; 
+      clock24 = true;
       extraConfig = ''
         # Custom tmux configuration
         set -g mouse on
         set -g base-index 1
         setw -g pane-base-index 1
-        
+
         # Key bindings
         bind r source-file ~/.config/tmux/tmux.conf \; display "Config reloaded!"
-        
+
         # Status bar
         set -g status-bg black
         set -g status-fg white
       '';
     };
-    
 
     # Enable home-manager to manage itself
     home-manager.enable = true;

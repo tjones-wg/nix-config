@@ -1,0 +1,19 @@
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/cachix/pre-commit-hooks.nix
+    rev: master
+    hooks:
+      - id: statix
+      - id: alejandra
+  - repo: https://github.com/psf/black
+    rev: 24.3.0
+    hooks:
+      - id: black
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v8.50.0
+    hooks:
+      - id: eslint
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.4.0
+    hooks:
+      - id: ruff

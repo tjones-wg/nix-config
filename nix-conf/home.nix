@@ -25,7 +25,7 @@ let
 
     $env.PATH = ($env.PATH |
       split row (char esep) |
-      prepend $env.HOME/.apps |
+      prepend home/tj/.apps |
       append /usr/bin/env
     )
   '';
@@ -45,7 +45,6 @@ in
     # Development tools
     docker
     compose2nix
-    nix-prefetch-docker
     git-crypt
     sops
     just
